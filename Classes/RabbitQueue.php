@@ -121,7 +121,7 @@ class RabbitQueue implements QueueInterface
      */
     public function release($messageId, array $options = [])
     {
-        throw new Exception('Not implemented');
+        $this->channel->basic_nack($messageId, false, true);
     }
 
     /**
@@ -129,7 +129,7 @@ class RabbitQueue implements QueueInterface
      */
     public function abort($messageId)
     {
-        $this->channel->basic_nack($messageId);
+        $this->channel->basic_nack($messageId, false, false);
     }
 
     /**
@@ -200,7 +200,11 @@ class RabbitQueue implements QueueInterface
             if ($ack) {
                 $this->channel->basic_ack($deliveryTag);
             }
-            $cache = new Message($deliveryTag, json_decode($message->body, true));
+            $cache = new Message(
+                $deliveryTag,
+                json_decode($message->body, true),
+                $message->has('application_headers') ? intval($message->get('application_headers')->getNativeData()['x-death'][0]['count']) : 0
+            );
         });
 
         while ($cache === null) {
