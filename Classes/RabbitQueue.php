@@ -121,7 +121,7 @@ class RabbitQueue implements QueueInterface
      */
     public function release($messageId, array $options = [])
     {
-        $this->channel->basic_nack($messageId, false, true);
+        $this->channel->basic_nack($messageId, false, false);
     }
 
     /**
@@ -129,7 +129,7 @@ class RabbitQueue implements QueueInterface
      */
     public function abort($messageId)
     {
-        $this->channel->basic_nack($messageId, false, false);
+        $this->channel->basic_ack($messageId);
     }
 
     /**
